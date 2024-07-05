@@ -19,6 +19,8 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
     resultBehavior: resultBehavior,
   ).merge(MergeSettings.fromJson(sender[MergeSettings.name]));
 
+  sender.remove(MergeSettings.name);
+
   final MergeStrategy effectiveStrategy = settings.strategy ?? strategy;
   final NullBehavior effectiveNullBehavior = settings.nullBehavior ?? nullBehavior;
   final MapBehavior effectiveMapBehavior = settings.mapBehavior ?? mapBehavior;

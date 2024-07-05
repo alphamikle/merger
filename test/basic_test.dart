@@ -2,7 +2,7 @@ import 'package:merger/src/map_merger.dart';
 import 'package:merger/src/settings.dart';
 import 'package:test/test.dart';
 
-import 'examples.dart';
+import 'basic_data.dart';
 
 void main() {
   test('Flat Map with flat Map', () {

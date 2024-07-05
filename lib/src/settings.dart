@@ -10,6 +10,8 @@ enum MergeStrategy {
 
   const MergeStrategy(this.value);
 
+  static const String name = 'strategy';
+
   static MergeStrategy? fromValue(Object? value) {
     if (value is MergeStrategy) {
       return value;
@@ -38,6 +40,8 @@ enum NullBehavior {
 
   const NullBehavior(this.value);
 
+  static const String name = 'nullBehavior';
+
   static NullBehavior? fromValue(Object? value) {
     if (value is NullBehavior) {
       return value;
@@ -64,6 +68,8 @@ enum MapBehavior {
 
   const MapBehavior(this.value);
 
+  static const String name = 'mapBehavior';
+
   static MapBehavior? fromValue(Object? value) {
     if (value is MapBehavior) {
       return value;
@@ -89,6 +95,8 @@ enum ListBehavior {
 
   const ListBehavior(this.value);
 
+  static const String name = 'listBehavior';
+
   static ListBehavior? fromValue(Object? value) {
     if (value is ListBehavior) {
       return value;
@@ -112,6 +120,8 @@ enum ResultBehavior {
   mergeWithOld('ResultBehavior:mergeWithOld');
 
   const ResultBehavior(this.value);
+
+  static const String name = 'resultBehavior';
 
   static ResultBehavior? fromValue(Object? value) {
     if (value is ResultBehavior) {
@@ -143,11 +153,11 @@ class MergeSettings {
     }
 
     return MergeSettings(
-      strategy: MergeStrategy.fromValue(json['strategy']),
-      nullBehavior: NullBehavior.fromValue(json['nullBehavior']),
-      mapBehavior: MapBehavior.fromValue(json['mapBehavior']),
-      listBehavior: ListBehavior.fromValue(json['listBehavior']),
-      resultBehavior: ResultBehavior.fromValue(json['resultBehavior']),
+      strategy: MergeStrategy.fromValue(json[MergeStrategy.name]),
+      nullBehavior: NullBehavior.fromValue(json[NullBehavior.name]),
+      mapBehavior: MapBehavior.fromValue(json[MapBehavior.name]),
+      listBehavior: ListBehavior.fromValue(json[ListBehavior.name]),
+      resultBehavior: ResultBehavior.fromValue(json[ResultBehavior.name]),
     );
   }
 
@@ -168,4 +178,8 @@ class MergeSettings {
   final MapBehavior? mapBehavior;
   final ListBehavior? listBehavior;
   final ResultBehavior? resultBehavior;
+
+  bool get isEmpty => strategy == null && nullBehavior == null && mapBehavior == null && listBehavior == null && resultBehavior == null;
+
+  bool get isNotEmpty => isEmpty == false;
 }

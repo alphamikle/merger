@@ -11,13 +11,18 @@ List<V> mergeLists<V extends Object?>(
   ListBehavior listBehavior = ListBehavior.valueByValue,
   ResultBehavior resultBehavior = ResultBehavior.returnNew,
 }) {
+  final MergeSettings valueSettings = MergeSettings.fromJson(sender.lastOrNull);
   final MergeSettings settings = MergeSettings(
     strategy: strategy,
     nullBehavior: nullBehavior,
     mapBehavior: mapBehavior,
     listBehavior: listBehavior,
     resultBehavior: resultBehavior,
-  ).merge(MergeSettings.fromJson(sender.lastOrNull));
+  ).merge(valueSettings);
+
+  if (valueSettings.isNotEmpty) {
+    sender.removeLast();
+  }
 
   final MergeStrategy effectiveStrategy = settings.strategy ?? strategy;
   final NullBehavior effectiveNullBehavior = settings.nullBehavior ?? nullBehavior;
