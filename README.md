@@ -1,39 +1,157 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Merger
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+A Flutter package for merging `Map<K extends Object, V extends Object?>` and `List<V extends Object?>` with any deepness.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+## How to use merger
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+There are two ways of using it - functions and extension methods.
 
-## Features
+### Functions
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+#### Maps
 
 ```dart
-const like = 'sample';
+import 'dart:convert';
+
+import 'package:merger/merger.dart';
+
+import 'deep_equals.dart';
+
+final Map<Object, Object?> recipient = {
+  'a': 1,
+  'b': '2',
+  'c': false,
+  'd': null,
+  'e': {
+    'f': 3.5,
+    'g': [
+      '4',
+      null,
+      {
+        'h': [false, true, 35.5],
+        'i': {1: '5'}
+      }
+    ],
+  }
+};
+
+final Map<Object, Object?> sender = {
+  'a': [1, 2, 3],
+  'c': 1,
+  'e': {
+    'g': [
+      5,
+      true,
+      {
+        'i': {'2': 6}
+      },
+      36,
+    ]
+  },
+  'j': [123],
+};
+
+final Map<String, Object?> expected = {
+  'a': [1, 2, 3],
+  'b': '2',
+  'c': 1,
+  'd': null,
+  'e': {
+    'f': 3.5,
+    'g': [
+      5,
+      true,
+      {
+        'h': [false, true, 35.5],
+        'i': {1: '5', '2': 6}
+      },
+      36
+    ]
+  },
+  'j': [123]
+};
+
+void main() {
+  final Map<Object, Object?> result = mergeMaps(recipient, sender);
+
+  print(deepEquals(expected, result)); // true
+}
 ```
 
-## Additional information
+#### Lists
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```dart
+import 'package:merger/merger.dart';
+
+import 'deep_equals.dart';
+import 'main.dart' as m;
+
+void main() {
+  final List<Object?> recipient = [
+    m.recipient,
+  ];
+
+  final List<Object?> sender = [
+    m.sender,
+  ];
+
+  final List<Object?> result = mergeLists(recipient, sender);
+
+  final List<Object?> expected = [
+    m.expected,
+  ];
+
+  print(deepEquals(expected, result)); // true
+}
+```
+
+### Extension methods
+
+```dart
+import 'package:merger/merger.dart';
+
+import 'deep_equals.dart';
+import 'main.dart' as m;
+
+void main() {
+  final List<Object?> recipientList = [m.recipient];
+  final List<Object?> senderList = [m.sender];
+
+  final List<Object?> resultList = recipientList.mergeWith(senderList);
+
+  final Map<Object, Object?> resultMap = m.recipient.mergeWith(m.sender);
+}
+```
+
+## Configuration
+
+Configuration is also possible in two ways. The second way complements the first, allowing you to customize your merge strategy in a very flexible way (if you need it).
+
+### Functions / Extension methods arguments
+
+```dart
+import 'package:merger/merger.dart';
+
+import 'main.dart' as m;
+
+void main() {
+  final Map<Object, Object?> resultMap = m.recipient.mergeWith(
+    m.sender,
+    strategy: MergeStrategy.addAndOverride,
+    resultBehavior: ResultBehavior.returnNew,
+    listBehavior: ListBehavior.replaceWithNew,
+    mapBehavior: MapBehavior.replaceWithNew,
+    nullBehavior: NullBehavior.doNothing,
+  );
+
+  final List<Object?> resultList = [m.recipient].mergeWith(
+    [m.sender],
+    strategy: MergeStrategy.addAndOverride,
+    resultBehavior: ResultBehavior.returnNew,
+    listBehavior: ListBehavior.replaceWithNew,
+    mapBehavior: MapBehavior.replaceWithNew,
+    nullBehavior: NullBehavior.doNothing,
+  );
+}
+```
+

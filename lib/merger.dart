@@ -1,7 +1,6 @@
 library merger;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'src/extensions.dart';
+export 'src/list_merger.dart';
+export 'src/map_merger.dart';
+export 'src/settings.dart';

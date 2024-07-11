@@ -1,11 +1,11 @@
 enum MergeStrategy {
-  /// Will add new values by key only if the same key is not present in the recipient
+  /// Will add new values by key or index only if the same key or index is not present in the recipient
   addOnly('MergeStrategy:addOnly'),
 
-  /// Will replace old values with the new one, only if the same key is present in the recipient
+  /// Will replace old values with the new one, only if the same key or index is present in the recipient
   overrideOnly('MergeStrategy:overrideOnly'),
 
-  /// Will replace and add new values by key in any way
+  /// Will replace and add new values by key or index in any way
   addAndOverride('MergeStrategy:addAndOverride');
 
   const MergeStrategy(this.value);
@@ -29,13 +29,14 @@ enum MergeStrategy {
 }
 
 enum NullBehavior {
-  /// If the new value is [null] then replace old value by key in recipient with explicit [null]
+  /// If the new value is [null] then replace old value by key or index in recipient with explicit [null]
   replace('NullBehavior:replace'),
 
-  /// If the new value is [null] - do nothing with the old value by that key in recipient
+  /// If the new value is [null] - do nothing with the old value by that key or index in recipient
+  /// Might be helpful within List<Object?> if you want to replace N-th item and don't know the values of 0...N items, just put [null] instead and they'll be the old one
   doNothing('NullBehavior:doNothing'),
 
-  /// If the new value is [null] - remove that key from the recipient at all
+  /// If the new value is [null] - remove that key or index from the recipient at all
   remove('NullBehavior:remove');
 
   const NullBehavior(this.value);

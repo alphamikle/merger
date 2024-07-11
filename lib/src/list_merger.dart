@@ -35,7 +35,7 @@ List<V> mergeLists<V extends Object?>(
     ResultBehavior.mergeWithOld => recipient,
   };
 
-  final List<int> indexesForRemove = [];
+  final Set<int> indexesForRemove = {};
 
   for (int i = 0; i < sender.length; i++) {
     final V value = sender[i];
@@ -83,7 +83,7 @@ List<V> mergeLists<V extends Object?>(
 
     void handleNullValue() {
       final _ = switch (effectiveNullBehavior) {
-        NullBehavior.replace => result.insertAtOrAdd(i, valueToMerge as V),
+        NullBehavior.replace => result.replaceAtOrAdd(i, valueToMerge as V),
         NullBehavior.doNothing => null,
         NullBehavior.remove => indexesForRemove.add(i),
       };
@@ -94,6 +94,9 @@ List<V> mergeLists<V extends Object?>(
         if (valueToMerge == null) {
           handleNullValue();
         } else {
+          if (recipientValue == null) {
+            handleNullValue();
+          }
           result.add(valueToMerge as V);
         }
       }
@@ -103,7 +106,10 @@ List<V> mergeLists<V extends Object?>(
       if (valueToMerge == null) {
         handleNullValue();
       } else {
-        result.insertAtOrAdd(i, valueToMerge as V);
+        if (recipientValue == null) {
+          handleNullValue();
+        }
+        result.replaceAtOrAdd(i, valueToMerge as V);
       }
     }
 
@@ -112,6 +118,9 @@ List<V> mergeLists<V extends Object?>(
         if (valueToMerge == null) {
           handleNullValue();
         } else {
+          if (recipientValue == null) {
+            handleNullValue();
+          }
           result[i] = valueToMerge as V;
         }
       }
@@ -124,10 +133,16 @@ List<V> mergeLists<V extends Object?>(
     };
   }
 
-  for (int i = 0; i < indexesForRemove.length; i++) {
-    final int index = indexesForRemove[i] - i;
+  final List<int> removableIndexes = indexesForRemove.toList();
 
+  /// Asc sorting
+  removableIndexes.sort((int a, int b) => a.compareTo(b));
+
+  int index = removableIndexes.length - 1;
+
+  while (index >= 0) {
     result.removeAt(index);
+    index--;
   }
 
   return result;

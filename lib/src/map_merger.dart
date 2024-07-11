@@ -92,6 +92,9 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
         if (valueToMerge == null) {
           handleNullValue();
         } else {
+          if (recipientValue == null) {
+            handleNullValue();
+          }
           result[key] = valueToMerge as V;
         }
       }
@@ -101,6 +104,9 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
       if (valueToMerge == null) {
         handleNullValue();
       } else {
+        if (recipientValue == null) {
+          handleNullValue();
+        }
         result[key] = valueToMerge as V;
       }
     }
@@ -110,6 +116,9 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
         if (valueToMerge == null) {
           handleNullValue();
         } else {
+          if (recipientValue == null) {
+            handleNullValue();
+          }
           result[key] = valueToMerge as V;
         }
       }

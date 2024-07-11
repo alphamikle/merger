@@ -1,5 +1,3 @@
-import 'settings.dart';
-
 typedef SettingsExtractor<S, V> = S? Function(V? object);
 typedef ObjectList = List<Object?>;
 
@@ -19,7 +17,7 @@ extension ExtendedList<T> on List<T> {
     return null;
   }
 
-  void insertAtOrAdd(int index, T value) {
+  void replaceAtOrAdd(int index, T value) {
     if (hasIndex(index)) {
       this[index] = value;
     } else {
@@ -27,14 +25,3 @@ extension ExtendedList<T> on List<T> {
     }
   }
 }
-
-S? _fromListExtractor<S, V extends ObjectList>(V list) {
-  if (list.isEmpty) {
-    return null;
-  }
-  if (list.last is S) {
-    return null;
-  }
-}
-
-extension SettingsExtractorFromList<T> on List<T> {}
