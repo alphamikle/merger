@@ -2,6 +2,8 @@ import 'list_merger.dart';
 import 'settings.dart';
 import 'tools.dart';
 
+typedef ValueAction = void Function();
+
 Map<K, V> mergeMaps<K extends Object, V extends Object?>(
   Map<K, V> recipient,
   Map<K, V> sender, {
@@ -87,7 +89,11 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
       };
     }
 
-    void addOnly() {
+    late final ValueAction addOnly;
+    late final ValueAction addAndOverride;
+    late final ValueAction overrideOnly;
+
+    addOnly = () {
       if (result.containsKey(key) == false) {
         if (valueToMerge == null) {
           handleNullValue();
@@ -97,10 +103,12 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
           }
           result[key] = valueToMerge as V;
         }
+      } else if ((result[key] is Map && valueToMerge is Map) || (result[key] is List && valueToMerge is List)) {
+        addAndOverride();
       }
-    }
+    };
 
-    void addAndOverride() {
+    addAndOverride = () {
       if (valueToMerge == null) {
         handleNullValue();
       } else {
@@ -109,9 +117,9 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
         }
         result[key] = valueToMerge as V;
       }
-    }
+    };
 
-    void overrideOnly() {
+    overrideOnly = () {
       if (result.containsKey(key)) {
         if (valueToMerge == null) {
           handleNullValue();
@@ -122,7 +130,7 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
           result[key] = valueToMerge as V;
         }
       }
-    }
+    };
 
     final _ = switch (effectiveStrategy) {
       MergeStrategy.addOnly => addOnly(),

@@ -3,7 +3,7 @@ import 'package:merger/merger.dart';
 import 'main.dart' as m;
 
 void main() {
-  final resultMap = m.recipient.mergeWith(
+  final Map<Object, Object?> resultMap = m.recipient.mergeWith(
     m.sender,
     strategy: MergeStrategy.addAndOverride,
     resultBehavior: ResultBehavior.returnNew,
@@ -12,7 +12,7 @@ void main() {
     nullBehavior: NullBehavior.doNothing,
   );
 
-  final resultList = [m.recipient].mergeWith(
+  final List<Object?> resultList = [m.recipient].mergeWith(
     [m.sender],
     strategy: MergeStrategy.addAndOverride,
     resultBehavior: ResultBehavior.returnNew,
@@ -20,4 +20,10 @@ void main() {
     mapBehavior: MapBehavior.replaceWithNew,
     nullBehavior: NullBehavior.doNothing,
   );
+
+  print(MergeStrategy.values); // [MergeStrategy.addOnly, MergeStrategy.overrideOnly, MergeStrategy.addAndOverride]
+  print(ResultBehavior.values); // [ResultBehavior.returnNew, ResultBehavior.mergeWithOld]
+  print(ListBehavior.values); // [ListBehavior.replaceWithNew, ListBehavior.valueByValue]
+  print(MapBehavior.values); // [MapBehavior.replaceWithNew, MapBehavior.keyByKey]
+  print(NullBehavior.values); // [NullBehavior.replace, NullBehavior.doNothing, NullBehavior.remove]
 }

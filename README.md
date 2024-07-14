@@ -152,6 +152,13 @@ void main() {
     mapBehavior: MapBehavior.replaceWithNew,
     nullBehavior: NullBehavior.doNothing,
   );
+
+  print(MergeStrategy.values); // [MergeStrategy.addOnly, MergeStrategy.overrideOnly, MergeStrategy.addAndOverride]
+  print(ResultBehavior.values); // [ResultBehavior.returnNew, ResultBehavior.mergeWithOld]
+  print(ListBehavior.values); // [ListBehavior.replaceWithNew, ListBehavior.valueByValue]
+  print(MapBehavior.values); // [MapBehavior.replaceWithNew, MapBehavior.keyByKey]
+  print(NullBehavior.values); // [NullBehavior.replace, NullBehavior.doNothing, NullBehavior.remove]
 }
+
 ```
 

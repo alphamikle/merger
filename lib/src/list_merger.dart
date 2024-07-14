@@ -35,8 +35,6 @@ List<V> mergeLists<V extends Object?>(
     ResultBehavior.mergeWithOld => recipient,
   };
 
-  final Set<int> indexesForRemove = {};
-
   for (int i = 0; i < sender.length; i++) {
     final V value = sender[i];
     final Object? recipientValue = recipient.atIndex(i);
@@ -85,19 +83,16 @@ List<V> mergeLists<V extends Object?>(
       final _ = switch (effectiveNullBehavior) {
         NullBehavior.replace => result.replaceAtOrAdd(i, valueToMerge as V),
         NullBehavior.doNothing => null,
-        NullBehavior.remove => indexesForRemove.add(i),
+        NullBehavior.remove => null,
       };
     }
 
     void addOnly() {
-      if (result.hasIndex(i) == false) {
+      if (result.hasIndex(i) == false || (result[i] is List && valueToMerge is List)) {
         if (valueToMerge == null) {
           handleNullValue();
         } else {
-          if (recipientValue == null) {
-            handleNullValue();
-          }
-          result.add(valueToMerge as V);
+          result.replaceAtOrAdd(i, valueToMerge as V);
         }
       }
     }
@@ -133,16 +128,15 @@ List<V> mergeLists<V extends Object?>(
     };
   }
 
-  final List<int> removableIndexes = indexesForRemove.toList();
+  if (effectiveNullBehavior == NullBehavior.remove) {
+    int index = result.length - 1;
 
-  /// Asc sorting
-  removableIndexes.sort((int a, int b) => a.compareTo(b));
-
-  int index = removableIndexes.length - 1;
-
-  while (index >= 0) {
-    result.removeAt(index);
-    index--;
+    while (index >= 0) {
+      if (result[index] == null) {
+        result.removeAt(index);
+      }
+      index--;
+    }
   }
 
   return result;

@@ -48,8 +48,8 @@ Map<String, Object?> get map2 => {
         k8: 31,
       },
       k7: {
-        k1: 1,
-        k2: [1, '2', null, false],
+        k9: 1,
+        k10: [1, '2', null, false],
       },
     };
 
@@ -82,8 +82,8 @@ Map<String, Object?> get map3 => {
         k8: 31,
       },
       k7: {
-        k1: 1,
-        k2: [
+        k9: 1,
+        k10: [
           1,
           2,
           3,

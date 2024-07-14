@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:merger/src/list_merger.dart';
@@ -9,14 +8,29 @@ import 'package:test/test.dart';
 
 import 'test_data.dart';
 
+bool get generateData => false;
+
+bool get skipMerge => false;
+
+bool get skipNull => false;
+
+bool get skipMap => false;
+
+bool get skipList => false;
+
+bool get skipResult => false;
+
 Future<void> main() async {
   group('Global test', () {
-    void generateTests({
+    void doTest({
       MergeStrategy? strategy,
       NullBehavior? nullBehavior,
       MapBehavior? mapBehavior,
       ListBehavior? listBehavior,
       ResultBehavior? resultBehavior,
+      bool skip = false,
+      bool withSecondMap = false,
+      bool withList = false,
     }) {
       final String key = [
         strategy?.value,
@@ -26,39 +40,80 @@ Future<void> main() async {
         resultBehavior?.value,
       ].where((it) => it != null).map((it) => it?.replaceAll(':', '.')).join('.');
 
-      if (nullBehavior == NullBehavior.doNothing) {
-        debugger();
+      final Map<String, Object?> map1Copy = map1;
+      final List<Object?> list1Copy = list1;
+
+      final Map<String, Object?> mapResult = mergeMaps(
+        map1Copy,
+        map2,
+        strategy: strategy ?? MergeStrategy.addAndOverride,
+        nullBehavior: nullBehavior ?? NullBehavior.replace,
+        mapBehavior: mapBehavior ?? MapBehavior.keyByKey,
+        listBehavior: listBehavior ?? ListBehavior.valueByValue,
+        resultBehavior: resultBehavior ?? ResultBehavior.returnNew,
+      );
+      final Map<String, Object?> mapResult2 = mergeMaps(
+        map1,
+        map3,
+        strategy: strategy ?? MergeStrategy.addAndOverride,
+        nullBehavior: nullBehavior ?? NullBehavior.replace,
+        mapBehavior: mapBehavior ?? MapBehavior.keyByKey,
+        listBehavior: listBehavior ?? ListBehavior.valueByValue,
+        resultBehavior: resultBehavior ?? ResultBehavior.returnNew,
+      );
+      final List<Object?> listResult = mergeLists(
+        list1Copy,
+        list2,
+        strategy: strategy ?? MergeStrategy.addAndOverride,
+        nullBehavior: nullBehavior ?? NullBehavior.doNothing,
+        mapBehavior: mapBehavior ?? MapBehavior.keyByKey,
+        listBehavior: listBehavior ?? ListBehavior.valueByValue,
+        resultBehavior: resultBehavior ?? ResultBehavior.returnNew,
+      );
+
+      if (withSecondMap == false && withList == false) {
+        test('Checking Map: $key', skip: skip, () async {
+          final File file = File([Directory.current.path, 'test', 'results', 'Map.$key.Golden.json'].join('/'));
+          final String rawContent = await file.readAsString();
+          final Map<String, Object?> validResult = (jsonDecode(rawContent) as Map).cast<String, Object?>();
+          expect(mapResult, validResult);
+
+          final _ = switch (resultBehavior) {
+            ResultBehavior.mergeWithOld => expect(identical(mapResult, map1Copy), true),
+            ResultBehavior.returnNew => expect(identical(mapResult, map1Copy), false),
+            null => null,
+          };
+        });
       }
 
-      final Map<String, Object?> mapResult = mergeMaps(map1, map2);
-      final Map<String, Object?> mapResult2 = mergeMaps(map1, map3);
-      final List<Object?> listResult = mergeLists(list1, list2);
+      if (withSecondMap && withList == false) {
+        test('Checking Map2: $key', skip: skip, () async {
+          final File file = File([Directory.current.path, 'test', 'results', 'Map2.$key.Golden.json'].join('/'));
+          final String rawContent = await file.readAsString();
+          final Map<String, Object?> validResult = (jsonDecode(rawContent) as Map).cast<String, Object?>();
+          expect(mapResult2, validResult);
+        });
+      }
 
-      test('Checking Map: $key', () async {
-        final File file = File([Directory.current.path, 'test', 'results', 'Map.$key.json'].join('/'));
-        final String rawContent = await file.readAsString();
-        final Map<String, Object?> validResult = (jsonDecode(rawContent) as Map).cast<String, Object?>();
-        expect(mapResult, validResult);
-      });
+      if (withSecondMap == false && withList) {
+        test('Checking List: $key', skip: skip, () async {
+          final File file = File([Directory.current.path, 'test', 'results', 'List.$key.Golden.json'].join('/'));
+          final String rawContent = await file.readAsString();
+          final List<Object?> validResult = (jsonDecode(rawContent) as List).cast<Object?>();
+          expect(listResult, validResult);
 
-      test('Checking Map2: $key', () async {
-        final File file = File([Directory.current.path, 'test', 'results', 'Map2.$key.json'].join('/'));
-        final String rawContent = await file.readAsString();
-        final Map<String, Object?> validResult = (jsonDecode(rawContent) as Map).cast<String, Object?>();
-        expect(mapResult2, validResult);
-      });
-
-      test('Checking List: $key', () async {
-        final File file = File([Directory.current.path, 'test', 'results', 'List.$key.json'].join('/'));
-        final String rawContent = await file.readAsString();
-        final List<Object?> validResult = (jsonDecode(rawContent) as List).cast<Object?>();
-        expect(listResult, validResult);
-      });
+          final _ = switch (resultBehavior) {
+            ResultBehavior.mergeWithOld => expect(identical(listResult, list1Copy), true),
+            ResultBehavior.returnNew => expect(identical(listResult, list1Copy), false),
+            null => null,
+          };
+        });
+      }
     }
 
     test(
-      'Collect results',
-      skip: false,
+      'Generate golden data',
+      skip: generateData == false,
       () async {
         Future<void> generateGoldenData({
           MergeStrategy? strategy,
@@ -75,9 +130,33 @@ Future<void> main() async {
             resultBehavior?.value,
           ].where((it) => it != null).map((it) => it?.replaceAll(':', '.')).join('.');
 
-          final Map<String, Object?> mapResult = mergeMaps(map1, map2);
-          final Map<String, Object?> mapResult2 = mergeMaps(map1, map3);
-          final List<Object?> listResult = mergeLists(list1, list2);
+          final Map<String, Object?> mapResult = mergeMaps(
+            map1,
+            map2,
+            strategy: strategy ?? MergeStrategy.addAndOverride,
+            nullBehavior: nullBehavior ?? NullBehavior.replace,
+            mapBehavior: mapBehavior ?? MapBehavior.keyByKey,
+            listBehavior: listBehavior ?? ListBehavior.valueByValue,
+            resultBehavior: resultBehavior ?? ResultBehavior.returnNew,
+          );
+          final Map<String, Object?> mapResult2 = mergeMaps(
+            map1,
+            map3,
+            strategy: strategy ?? MergeStrategy.addAndOverride,
+            nullBehavior: nullBehavior ?? NullBehavior.replace,
+            mapBehavior: mapBehavior ?? MapBehavior.keyByKey,
+            listBehavior: listBehavior ?? ListBehavior.valueByValue,
+            resultBehavior: resultBehavior ?? ResultBehavior.returnNew,
+          );
+          final List<Object?> listResult = mergeLists(
+            list1,
+            list2,
+            strategy: strategy ?? MergeStrategy.addAndOverride,
+            nullBehavior: nullBehavior ?? NullBehavior.doNothing,
+            mapBehavior: mapBehavior ?? MapBehavior.keyByKey,
+            listBehavior: listBehavior ?? ListBehavior.valueByValue,
+            resultBehavior: resultBehavior ?? ResultBehavior.returnNew,
+          );
 
           await File([Directory.current.path, 'test', 'results', 'Map.$key.json'].join('/')).writeAsString(jsonEncode(mapResult));
           await File([Directory.current.path, 'test', 'results', 'Map2.$key.json'].join('/')).writeAsString(jsonEncode(mapResult2));
@@ -106,24 +185,31 @@ Future<void> main() async {
       },
     );
 
-    for (final strategy in MergeStrategy.values) {
-      generateTests(strategy: strategy);
-    }
+    doTest(strategy: MergeStrategy.addOnly, skip: skipMerge);
+    doTest(strategy: MergeStrategy.addAndOverride, skip: skipMerge);
+    doTest(strategy: MergeStrategy.overrideOnly, skip: skipMerge);
 
-    for (final nullBehavior in NullBehavior.values) {
-      generateTests(nullBehavior: nullBehavior);
-    }
+    // TODO(alphamikle): Second map + List
 
-    for (final mapBehavior in MapBehavior.values) {
-      generateTests(mapBehavior: mapBehavior);
-    }
+    doTest(nullBehavior: NullBehavior.doNothing, skip: skipNull);
+    doTest(nullBehavior: NullBehavior.remove, skip: skipNull);
+    doTest(nullBehavior: NullBehavior.replace, skip: skipNull);
 
-    for (final listBehavior in ListBehavior.values) {
-      generateTests(listBehavior: listBehavior);
-    }
+    // TODO(alphamikle): Second map + List
 
-    for (final resultBehavior in ResultBehavior.values) {
-      generateTests(resultBehavior: resultBehavior);
-    }
+    doTest(mapBehavior: MapBehavior.keyByKey, skip: skipMap);
+    doTest(mapBehavior: MapBehavior.replaceWithNew, skip: skipMap);
+
+    // TODO(alphamikle): Second map + List
+
+    doTest(listBehavior: ListBehavior.valueByValue, skip: skipList);
+    doTest(listBehavior: ListBehavior.replaceWithNew, skip: skipList);
+
+    // TODO(alphamikle): Second map + List
+
+    doTest(resultBehavior: ResultBehavior.returnNew, skip: skipResult);
+    doTest(resultBehavior: ResultBehavior.mergeWithOld, skip: skipResult);
+
+    // TODO(alphamikle): Second map + List
   });
 }
