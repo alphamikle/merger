@@ -1,6 +1,5 @@
 import 'list_merger.dart';
 import 'settings.dart';
-import 'tools.dart';
 
 typedef ValueAction = void Function();
 
@@ -12,6 +11,9 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
   MapBehavior mapBehavior = MapBehavior.keyByKey,
   ListBehavior listBehavior = ListBehavior.valueByValue,
   ResultBehavior resultBehavior = ResultBehavior.returnNew,
+
+  /// Probably, you'll never need to use this flag, but it is needed for [https://pub.dev/packages/easiest_localization] to build a language scheme
+  bool joinStrings = false,
 }) {
   final MergeSettings settings = MergeSettings(
     strategy: strategy,
@@ -35,19 +37,13 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
   };
 
   for (final MapEntry(key: key, value: value) in sender.entries) {
-    if (isScalar(key) == false) {
-      throw Exception('Keys of map can be only scalar type. Key "${key.toString()}" has wrong type "${key.runtimeType}"');
-    }
-
     final Object? recipientValue = recipient[key];
     final bool isRecValueMap = recipientValue is Map<Object, Object?>;
     final bool isRecValueList = recipientValue is List<Object?>;
 
     V? valueToMerge;
 
-    if (isScalar(value)) {
-      valueToMerge = value;
-    } else if (value is Map<Object, Object?>) {
+    if (value is Map<Object, Object?>) {
       final bool replaceWithNew = switch (effectiveMapBehavior) {
         MapBehavior.keyByKey => false,
         MapBehavior.replaceWithNew => true,
@@ -61,6 +57,7 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
         mapBehavior: effectiveMapBehavior,
         listBehavior: effectiveListBehavior,
         resultBehavior: effectiveResultBehavior,
+        joinStrings: joinStrings,
       ) as V?;
     } else if (value is List<Object?>) {
       final bool replaceWithNew = switch (effectiveListBehavior) {
@@ -76,9 +73,10 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
         mapBehavior: effectiveMapBehavior,
         listBehavior: effectiveListBehavior,
         resultBehavior: effectiveResultBehavior,
+        joinStrings: joinStrings,
       ) as V?;
     } else {
-      throw Exception('Unsupported mergeable type: (${value.runtimeType}) $value with key $key');
+      valueToMerge = value;
     }
 
     void handleNullValue() {
@@ -115,7 +113,11 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
         if (recipientValue == null) {
           handleNullValue();
         }
-        result[key] = valueToMerge as V;
+        if (joinStrings && valueToMerge is String) {
+          result[key] = '$recipientValue $valueToMerge' as V;
+        } else {
+          result[key] = valueToMerge as V;
+        }
       }
     };
 
@@ -127,7 +129,11 @@ Map<K, V> mergeMaps<K extends Object, V extends Object?>(
           if (recipientValue == null) {
             handleNullValue();
           }
-          result[key] = valueToMerge as V;
+          if (joinStrings && valueToMerge is String) {
+            result[key] = '$recipientValue $valueToMerge' as V;
+          } else {
+            result[key] = valueToMerge as V;
+          }
         }
       }
     };

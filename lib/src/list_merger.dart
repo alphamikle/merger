@@ -10,6 +10,9 @@ List<V> mergeLists<V extends Object?>(
   MapBehavior mapBehavior = MapBehavior.keyByKey,
   ListBehavior listBehavior = ListBehavior.valueByValue,
   ResultBehavior resultBehavior = ResultBehavior.returnNew,
+
+  /// Probably, you'll never need to use this flag, but it is needed for [https://pub.dev/packages/easiest_localization] to build a language scheme
+  bool joinStrings = false,
 }) {
   final MergeSettings valueSettings = MergeSettings.fromJson(sender.lastOrNull);
   final MergeSettings settings = MergeSettings(
@@ -43,9 +46,7 @@ List<V> mergeLists<V extends Object?>(
 
     V? valueToMerge;
 
-    if (isScalar(value)) {
-      valueToMerge = value;
-    } else if (value is Map<Object, Object?>) {
+    if (value is Map<Object, Object?>) {
       final bool replaceWithNew = switch (effectiveMapBehavior) {
         MapBehavior.keyByKey => false,
         MapBehavior.replaceWithNew => true,
@@ -59,6 +60,7 @@ List<V> mergeLists<V extends Object?>(
         mapBehavior: effectiveMapBehavior,
         listBehavior: effectiveListBehavior,
         resultBehavior: effectiveResultBehavior,
+        joinStrings: joinStrings,
       ) as V?;
     } else if (value is List<Object?>) {
       final bool replaceWithNew = switch (effectiveListBehavior) {
@@ -74,9 +76,10 @@ List<V> mergeLists<V extends Object?>(
         mapBehavior: effectiveMapBehavior,
         listBehavior: effectiveListBehavior,
         resultBehavior: effectiveResultBehavior,
+        joinStrings: joinStrings,
       ) as V?;
     } else {
-      throw Exception('Unsupported mergeable type: (${value.runtimeType}) $value with index $i');
+      valueToMerge = value;
     }
 
     void handleNullValue() {
@@ -92,7 +95,11 @@ List<V> mergeLists<V extends Object?>(
         if (valueToMerge == null) {
           handleNullValue();
         } else {
-          result.replaceAtOrAdd(i, valueToMerge as V);
+          if (joinStrings && valueToMerge is String) {
+            result.replaceAtOrAdd(i, '$recipientValue $valueToMerge' as V);
+          } else {
+            result.replaceAtOrAdd(i, valueToMerge as V);
+          }
         }
       }
     }
@@ -104,7 +111,11 @@ List<V> mergeLists<V extends Object?>(
         if (recipientValue == null) {
           handleNullValue();
         }
-        result.replaceAtOrAdd(i, valueToMerge as V);
+        if (joinStrings && valueToMerge is String) {
+          result.replaceAtOrAdd(i, '$recipientValue $valueToMerge' as V);
+        } else {
+          result.replaceAtOrAdd(i, valueToMerge as V);
+        }
       }
     }
 
@@ -116,7 +127,11 @@ List<V> mergeLists<V extends Object?>(
           if (recipientValue == null) {
             handleNullValue();
           }
-          result[i] = valueToMerge as V;
+          if (joinStrings && valueToMerge is String) {
+            result[i] = '$recipientValue $valueToMerge' as V;
+          } else {
+            result[i] = valueToMerge as V;
+          }
         }
       }
     }

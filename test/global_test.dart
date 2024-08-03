@@ -189,27 +189,17 @@ Future<void> main() async {
     doTest(strategy: MergeStrategy.addAndOverride, skip: skipMerge);
     doTest(strategy: MergeStrategy.overrideOnly, skip: skipMerge);
 
-    // TODO(alphamikle): Second map + List
-
     doTest(nullBehavior: NullBehavior.doNothing, skip: skipNull);
     doTest(nullBehavior: NullBehavior.remove, skip: skipNull);
     doTest(nullBehavior: NullBehavior.replace, skip: skipNull);
 
-    // TODO(alphamikle): Second map + List
-
     doTest(mapBehavior: MapBehavior.keyByKey, skip: skipMap);
     doTest(mapBehavior: MapBehavior.replaceWithNew, skip: skipMap);
-
-    // TODO(alphamikle): Second map + List
 
     doTest(listBehavior: ListBehavior.valueByValue, skip: skipList);
     doTest(listBehavior: ListBehavior.replaceWithNew, skip: skipList);
 
-    // TODO(alphamikle): Second map + List
-
     doTest(resultBehavior: ResultBehavior.returnNew, skip: skipResult);
     doTest(resultBehavior: ResultBehavior.mergeWithOld, skip: skipResult);
-
-    // TODO(alphamikle): Second map + List
   });
 }

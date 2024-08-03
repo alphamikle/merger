@@ -41,7 +41,7 @@ enum NullBehavior {
 
   const NullBehavior(this.value);
 
-  static const String name = 'nullBehavior';
+  static const String name = 'NullBehavior';
 
   static NullBehavior? fromValue(Object? value) {
     if (value is NullBehavior) {
@@ -69,7 +69,7 @@ enum MapBehavior {
 
   const MapBehavior(this.value);
 
-  static const String name = 'mapBehavior';
+  static const String name = 'MapBehavior';
 
   static MapBehavior? fromValue(Object? value) {
     if (value is MapBehavior) {
@@ -96,7 +96,7 @@ enum ListBehavior {
 
   const ListBehavior(this.value);
 
-  static const String name = 'listBehavior';
+  static const String name = 'ListBehavior';
 
   static ListBehavior? fromValue(Object? value) {
     if (value is ListBehavior) {
@@ -122,7 +122,7 @@ enum ResultBehavior {
 
   const ResultBehavior(this.value);
 
-  static const String name = 'resultBehavior';
+  static const String name = 'ResultBehavior';
 
   static ResultBehavior? fromValue(Object? value) {
     if (value is ResultBehavior) {
@@ -162,7 +162,7 @@ class MergeSettings {
     );
   }
 
-  static const String name = 'MergeSettings:';
+  static const String name = 'MergeSettings';
 
   MergeSettings merge(MergeSettings other) {
     return MergeSettings(

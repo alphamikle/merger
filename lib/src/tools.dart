@@ -1,10 +1,6 @@
 typedef SettingsExtractor<S, V> = S? Function(V? object);
 typedef ObjectList = List<Object?>;
 
-bool isScalar(Object? value) {
-  return value == null || value is int || value is double || value is String || value is bool;
-}
-
 extension ExtendedList<T> on List<T> {
   bool hasIndex(int index) {
     return length > index;
